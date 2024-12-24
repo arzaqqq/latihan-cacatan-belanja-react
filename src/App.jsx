@@ -1,102 +1,121 @@
 import { useState } from "react";
 
-
-export default function App() {
-  const [items, setItems] = useState(groceryItems);
-  
-  function handleAddItem(item){
-    setItems([...items, item]);
-  }
-
-
-  function handleDeleteItem(id) {
-    setItems((item) => items.filter((item) => item.id !== id));
-  }
-
-  return (
-    <div className="app">
-       <Header/>
-      <Form onAddItem={ handleAddItem} />
-      <GroceryList items={items} onDeleteItem={handleDeleteItem} />
-       <Footer/>
-    </div>
-  );
-}
-
 const groceryItems = [
   {
     id: 1,
-    name: 'Kopi Bubuk',
+    name: "Kopi Bubuk",
     quantity: 2,
     checked: true,
   },
   {
     id: 2,
-    name: 'Gula Pasir',
+    name: "Gula Pasir",
     quantity: 5,
     checked: false,
   },
   {
     id: 3,
-    name: 'Air Mineral',
+    name: "Air Mineral",
     quantity: 3,
     checked: false,
   },
 ];
 
+export default function App() {
+  const [items, setItems] = useState(groceryItems);
+
+  function handleAddItem(item) {
+    setItems([...items, item]);
+  }
+
+  function handleDeleteItem(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
+
+  function handelToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
+  }
+
+  return (
+    <div className="app">
+      <Header />
+      <Form onAddItem={handleAddItem} />
+      <GroceryList
+        items={items}
+        onDeleteItem={handleDeleteItem}
+        onToggleItem={handelToggleItem}
+      />
+      <Footer />
+    </div>
+  );
+}
+
 function Header() {
   return <h1>Catatan Belanjaku 📝</h1>;
 }
 
-
-function Form({onAddItem}) {
-  const [name, setName] = useState('');
+function Form({ onAddItem }) {
+  const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(1);
 
   function handleSumbit(e) {
     e.preventDefault();
-  
+
     if (!name) return;
 
-
     const newItem = { name, quantity, checked: false, id: Date.now() };
-
     onAddItem(newItem);
 
-    console.log(newItem)
-    setName('');
+    setName("");
     setQuantity(1);
-
-}
-
+  }
 
   const quantityNum = [...Array(20)].map((_, i) => (
-    <option key={i} value={i + 1}>{i + 1}</option>
+    <option key={i} value={i + 1}>
+      {i + 1}
+    </option>
   ));
 
   return (
     <form className="add-form" onSubmit={handleSumbit}>
-    <div>
-      <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}>
+      <div>
+        <select
+          value={quantity}
+          onChange={(e) => setQuantity(Number(e.target.value))}
+        >
           {quantityNum}
-          </select>
-        <input type="text" placeholder="nama barang..." value={name} onChange={(e) => { setName(e.target.value) }}/>
-
-    </div>
-    <button>Tambah</button>
-  </form>
+        </select>
+        <input
+          type="text"
+          placeholder="nama barang..."
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
+        />
+      </div>
+      <button>Tambah</button>
+    </form>
   );
 }
 
-function GroceryList({items, onDeleteItem}) {
+function GroceryList({ items, onDeleteItem, onToggleItem }) {
   return (
     <>
-     <div className="list">
+      <div className="list">
         <ul>
-        {items.map((item) => 
-          <Item item={item} key={item.id} onDeleteItem={onDeleteItem} />
-      
-    )}
+          {items.map((item) => (
+            <Item
+              item={item}
+              key={item.id}
+              onDeleteItem={onDeleteItem}
+              onToggleItem={onToggleItem}
+            />
+          ))}
         </ul>
       </div>
       <div className="actions">
@@ -106,24 +125,35 @@ function GroceryList({items, onDeleteItem}) {
           <option value="checked">Urutkan berdasarkan ceklis</option>
         </select>
         <button>Bersihkan Daftar</button>
-      </div></>
+      </div>
+    </>
   );
 }
 
-function Item({item, onDeleteItem}) {
+function Item({ item, onDeleteItem, onToggleItem }) {
   return (
     <li key={item.id}>
-      <input type="checkbox" checked={true} onChange={() => { }} />
-      <span style={item.checked ? { textDecoration: "line-through" } : {}}>{item.quantity} {item.name}</span>
+      <input
+        type="checkbox"
+        checked={item.checked}
+        onChange={() => onToggleItem(item.id)}
+      />
+      <span
+        style={
+          item.checked ? { textDecoration: "line-through" } : {}
+        }
+      >
+        {item.quantity} {item.name}
+      </span>
       <button onClick={() => onDeleteItem(item.id)}>&times;</button>
     </li>
-
   );
 }
 
-
 function Footer() {
-  <footer className="stats">
-        Ada 10 barang di daftar belanjaan, 5 barang sudah dibeli (50%)
-      </footer>
+  return (
+    <footer className="stats">
+      Ada 10 barang di daftar belanjaan, 5 barang sudah dibeli (50%)
+    </footer>
+  );
 }
